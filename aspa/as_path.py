@@ -14,6 +14,13 @@ class AsPathSegment(object):
         self.type = segment_type
         self.values = values
 
+    def __repr__(self):
+        values = map(str, self.values)
+        if self.type == AS_SEQUENCE:
+            return f"{'_'.join(values)}"
+        else:
+            return f"[ {' '.join(values)} ]"
+
 
 class AsPath(object):
     def __init__(self, *segments):
@@ -21,6 +28,9 @@ class AsPath(object):
             if not isinstance(s, AsPathSegment):
                 raise TypeError(f"expected AsPathSegment, got {s}")
         self.segments = segments
+
+    def __repr__(self):
+        return f"{'_'.join(map(repr, self.segments))}"
 
     def flatten(self):
         return [AsPathElement(orig_segment_type=s.type, value=v)
