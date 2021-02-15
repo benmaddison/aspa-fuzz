@@ -1,0 +1,10 @@
+---
+# List of ASPA objects to be considered for test cases
+#
+- customer_as: 1
+  provider_as_set: [2]
+- customer_as: 4
+  provider_as_set: [3]
+- customer_as: 10
+  provider_as_set: [4]
+...

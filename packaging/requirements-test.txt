@@ -1,3 +1,4 @@
 # Testing utilities
 pytest
 pytest-cov
+PyYAML
