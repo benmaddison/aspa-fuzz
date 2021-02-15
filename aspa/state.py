@@ -4,23 +4,27 @@
 
 
 class _BaseState(object):
-    pass
+    def __repr__(self):
+        try:
+            return self.name
+        except AttributeError:
+            return super().__repr__()
 
 
 class _Unverifiable(_BaseState):
-    pass
+    name = "Unverifiable"
 
 
 class _Unknown(_BaseState):
-    pass
+    name = "Unknown"
 
 
 class _Valid(_BaseState):
-    pass
+    name = "Valid"
 
 
 class _Invalid(_BaseState):
-    pass
+    name = "Invalid"
 
 
 Unverifiable = _Unverifiable()

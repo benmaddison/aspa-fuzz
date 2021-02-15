@@ -4,27 +4,31 @@
 
 
 class _BaseNeighborType(object):
-    pass
+    def __repr__(self):
+        try:
+            return self.name
+        except AttributeError:
+            return super().__repr__()
 
 
 class _Customer(_BaseNeighborType):
-    pass
+    name = "Customer"
 
 
 class _Provider(_BaseNeighborType):
-    pass
+    name = "Provider"
 
 
 class _Peer(_BaseNeighborType):
-    pass
+    name = "Peer"
 
 
 class _IxpRouteServer(_BaseNeighborType):
-    pass
+    name = "IXP Route Server"
 
 
 class _IxpRouteServerClient(_BaseNeighborType):
-    pass
+    name = "IXP Route Server Client"
 
 
 Any = _BaseNeighborType()

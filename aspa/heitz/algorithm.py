@@ -8,11 +8,14 @@
 
 from ..as_path import AS_SEQUENCE, AsPath
 from ..aspa import AspaSet, NoAspa
+from ..meta import MetaValidator
 from ..state import Unverifiable, Unknown, Valid, Invalid
 
 
-class Validator(object):
+class Validator(metaclass=MetaValidator):
     """ASPA verification alternative triple-wise algorithm."""
+
+    name = "HeitzValidator"
 
     def __init__(self, aspa_set: AspaSet, local_as):
         self.aspa_set = aspa_set
