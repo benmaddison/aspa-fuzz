@@ -34,26 +34,52 @@ class Validator(object):
         for transit in as_seq[1:-1]:
             # Get index of 'transit' in 'as_seq'
             i = as_seq.index(transit)
-            # Create a tuple containing the neighbors of 'transit'
-            neighbors = (as_seq[i-1], as_seq[i+1])
-            # Get the pairwise assertions of each neighbor
-            # with respect to 'transit'
-            neighbor_assertions = [self.verify_pair(n, transit, afi)
-                                   for n in neighbors]
-            # step 2.1 - if both neighbors assert 'transit' is not an
-            #            authorised provider, segment (and therefore also
-            #            path) is Invalid
-            if all(state is Invalid for state in neighbor_assertions):
-                return Invalid
+            #
+            # step 2.1 - (incorporating step 3, since 2.1 is the special case
+            #            n=1)
+            #            if a sequence of transits T1..Tn (n >= 1) exists, such
+            #            that:
+            #            - the left neighor of T1 asserts that T1 is not an
+            #              authorised provider; and
+            #            - the right neighbor of Tn asserts that Tn is not an
+            #              authorised provider
+            #            then there is no possible set of ASPA objects for
+            #            which the path can be Valid.
+            #
+            # check if the left neighbor of 'transit' has asserted that
+            # 'transit' is not a provider
+            if self.verify_left(as_seq, i, afi) is Invalid:
+                # iterate over the remaining transits in the sequence
+                # start at 'i', to account for case 'transit' == 'next_transit'
+                for next_transit in as_seq[i:-1]:
+                    # get index of 'next_transit' in 'as_seq'
+                    j = as_seq.index(next_transit)
+                    # check if the right neighbor of 'next_transit' has
+                    # asserted that 'next_transit' is not a provider
+                    if self.verify_right(as_seq, j, afi) is Invalid:
+                        # the sequence 'transit..next_transit' is a valley
+                        # there is a leak in there somewhere
+                        return Invalid
+            #
             # step 2.2 - if either neighbor asserts 'transit' is an
-            #            authorised provider, segment is Valid
-            if any(state is Valid for state in neighbor_assertions):
+            #            authorised provider, segment is Valid.
+            #
+            if (self.verify_left(as_seq, i, afi) is Valid or
+                    self.verify_right(as_seq, i, afi) is Valid):
                 continue
-            # step 2.3 - otherwise, the segment is unknown.
-            #            the path will be unkown unless some later segment
+            #
+            # step 2.3 - otherwise, the segment is Unknown.
+            #            the path will be Unkown unless some later segment
             #            is Invalid
+            #
             path_state = Unknown
         return path_state
+
+    def verify_left(self, as_seq, index, afi):
+        return self.verify_pair(as_seq[index-1], as_seq[index], afi)
+
+    def verify_right(self, as_seq, index, afi):
+        return self.verify_pair(as_seq[index+1], as_seq[index], afi)
 
     def verify_pair(self, as1, as2, afi):
         try:
