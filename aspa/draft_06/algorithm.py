@@ -17,7 +17,7 @@ from ..state import Unverifiable, Unknown, Valid, Invalid
 class Validator(object):
     """ASPA verification as defined in draft-sidrops-aspa-verification-06."""
 
-    def __init__(self, aspa_set: AspaSet):
+    def __init__(self, aspa_set: AspaSet, **kwargs):
         self.aspa_set = aspa_set
 
     def validate(self, as_path: AsPath, neighbor_as, afi, neighbor_type):
