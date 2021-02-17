@@ -2,9 +2,55 @@
 # List of ASPA objects to be considered for test cases
 #
 - customer_as: 1
-  provider_as_set: [2]
+  provider_as_set: [4, 5, 6]
+- customer_as: 2
+  provider_as_set: [10, 11]
+- customer_as: 3
+  provider_as_set: [1, 13, 14]
 - customer_as: 4
-  provider_as_set: [3]
+  provider_as_set: [16, 24]
+- customer_as: 5
+  provider_as_set: [1, 17, 25]
+- customer_as: 6
+  provider_as_set: []
+- customer_as: 7
+  provider_as_set: []
+- customer_as: 8
+  provider_as_set: [0]
+- customer_as: 9
+  provider_as_set: [2]
 - customer_as: 10
+  provider_as_set: [0]
+- customer_as: 11
+  provider_as_set: [2]
+- customer_as: 12
+  provider_as_set: [3]
+- customer_as: 13
+  provider_as_set: [0]
+- customer_as: 14
+  provider_as_set: [3, 25]
+- customer_as: 15
   provider_as_set: [4]
+- customer_as: 16
+  provider_as_set: [4]
+- customer_as: 17
+  provider_as_set: [5]
+- customer_as: 18
+  provider_as_set: [6]
+- customer_as: 19
+  provider_as_set: []
+- customer_as: 20
+  provider_as_set: [19]
+- customer_as: 21
+  provider_as_set: [0]
+- customer_as: 22
+  provider_as_set: []
+- customer_as: 23
+  provider_as_set: [22]
+- customer_as: 24
+  provider_as_set: [0]
+- customer_as: 25
+  provider_as_set: [0]
+- customer_as: 26
+  provider_as_set: [5]
 ...

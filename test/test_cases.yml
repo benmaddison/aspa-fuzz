@@ -1,51 +1,218 @@
 ---
 # List of test cases for validation algorithm verification
 #
-  # valid path with an indeterminate adjacency in the middle
-  # TODO: discuss whether this should be Valid or Unknown
-- as_path: [1, 2, 3, 4]
-  neighbor_as: 4
-  neighbor_type: Provider
-  expected_state: Unknown
-  # unknown path from a provider
-- as_path: [1, 2, 5, 3, 4]
-  neighbor_as: 4
-  neighbor_type: Provider
-  expected_state: Unknown
-  # valid prepended path from peer
-- as_path: [1, 2, 2]
+# Paths read left to right. i.e. for [X, Y, Z], X is origin, Z is neighbor
+#
+- as_path: []
+  neighbor_as: 1
+  neighbor_types: [Customer, Peer, Provider, IxpRouteServer, IxpRouteServer]
+  expected_state: Valid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator returns Invalid for empty paths. See issue #2"
+
+  # 2 -- 1
+- as_path: [2]
   neighbor_as: 2
-  neighbor_type: Peer
+  neighbor_types: [Peer]
   expected_state: Valid
-  # leaked path from customer
-- as_path: [1, 3]
+  # route-server variant
+- as_path: [2]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Valid
+
+  # 3 -> 1
+- as_path: [3]
   neighbor_as: 3
-  neighbor_type: Customer
-  expected_state: Invalid
-  # valid prepended path from IXP RS
-- as_path: [1, 1, 2]
-  neighbor_as: 5
-  neighbor_type: IxpRouteServer
+  neighbor_types: [Customer]
   expected_state: Valid
-  # invalid empty path from IX RS client
-  # TODO: discuss whether the algorithm should handle
-  #       empty paths specially? Out of scope? Precludes iBGP
-- as_path: []
-  neighbor_as: 0
-  neighbor_type: IxpRouteServerClient
-  expected_state: Invalid
-  # invalid empty path from IX RS
-  # TODO: as above
-- as_path: []
-  neighbor_as: 0
-  neighbor_type: IxpRouteServer
-  expected_state: Invalid
-  # leak path via IX RS
-  # TODO: BUG: A transparent IX RS will have the effect of
-  #            treating all paths from an RS peer as if they
-  #            were received from a provider
-- as_path: [1, 3]
+
+  # 4 <- 1
+- as_path: [4]
+  neighbor_as: 4
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 5 <> 1
+- as_path: [5]
   neighbor_as: 5
-  neighbor_type: IxpRouteServer
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 6 <? 1
+- as_path: [6]
+  neighbor_as: 6
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 7 -? 1
+- as_path: [7]
+  neighbor_as: 7
+  neighbor_types: [Customer, Peer]
+  expected_state: Valid
+  # route-server variant
+- as_path: [7]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Valid
+
+  # 8 -- 2 -- 1
+- as_path: [8, 2]
+  neighbor_as: 2
+  neighbor_types: [Peer]
   expected_state: Invalid
+  # route-server variant
+- as_path: [8, 2]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Invalid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
+
+  # 9 -> 2 -- 1
+- as_path: [9, 2]
+  neighbor_as: 2
+  neighbor_types: [Peer]
+  expected_state: Valid
+
+  # 10 <- 2 -- 1
+- as_path: [10, 2]
+  neighbor_as: 2
+  neighbor_types: [Peer]
+  expected_state: Invalid
+
+  # 11 <> 2 -- 1
+- as_path: [11, 2]
+  neighbor_as: 2
+  neighbor_types: [Peer]
+  expected_state: Valid
+
+  # 8 -- 3 -> 1
+- as_path: [8, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer]
+  expected_state: Invalid
+
+  # 12 -> 3 -> 1
+- as_path: [12, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer]
+  expected_state: Valid
+
+  # 13 <- 3 -> 1
+- as_path: [13, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer]
+  expected_state: Invalid
+
+  # 14 <> 3 -> 1
+- as_path: [14, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer]
+  expected_state: Valid
+
+  # 8 -- 4 <- 1
+- as_path: [8, 4]
+  neighbor_as: 4
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 15 -> 4 <- 1
+- as_path: [15, 4]
+  neighbor_as: 4
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 16 <> 4 <- 1
+- as_path: [16, 4]
+  neighbor_as: 4
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 24 <- 4 <- 1
+- as_path: [24, 4]
+  neighbor_as: 4
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 8 -- 5 <> 1
+- as_path: [8, 5]
+  neighbor_as: 5
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 17 <> 5 <> 1
+- as_path: [17, 5]
+  neighbor_as: 5
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 25 <- 5 <> 1
+- as_path: [25, 5]
+  neighbor_as: 5
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 26 -> 5 <> 1
+- as_path: [26, 5]
+  neighbor_as: 5
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 18 ?> 6 <? 1
+- as_path: [18, 6]
+  neighbor_as: 6
+  neighbor_types: [Provider]
+  expected_state: Valid
+
+  # 19 ?? 6 <? 1
+- as_path: [19, 6]
+  neighbor_as: 6
+  neighbor_types: [Provider]
+  expected_state: Valid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator returns Unknown in this case. See issue #1"
+
+  # 19 ?? 7 -? 1
+- as_path: [19, 7]
+  neighbor_as: 7
+  neighbor_types: [Customer, Peer]
+  expected_state: Unknown
+
+  # 21 ?- 7 -? 1
+- as_path: [21, 7]
+  neighbor_as: 7
+  neighbor_types: [Customer, Peer]
+  expected_state: Invalid
+
+  # 20 ?> 19 ?? 6 <? 1
+- as_path: [20, 19, 6]
+  neighbor_as: 6
+  neighbor_types: [Provider]
+  expected_state: Valid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator returns Unknown in this case. See issue #1"
+
+  # 25 <- 14 <> 3 -> 1
+- as_path: [25, 14, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer]
+  expected_state: Invalid
+
+  # 21 ?- 22 ?? 19 ?? 7 -? 1
+- as_path: [21, 22, 19, 7]
+  neighbor_as: 7
+  neighbor_types: [Customer, Peer]
+  expected_state: Invalid
+
+  # 23 ?> 22 ?? 19 ?? 6 <? 1
+- as_path: [23, 22, 19, 6]
+  neighbor_as: 6
+  neighbor_types: [Provider]
+  expected_state: Unknown
+
 ...
