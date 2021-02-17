@@ -10,6 +10,26 @@ suboptimal (or downright incorrect) results.
 
 These are documented below.
 
+## Notation
+
+It is frequently convenient to write about a hypothetical `AS_PATH` while also indicating
+which ASPA objects have been issued by the ASs appearing in it.
+
+To facilitate this, the following convention will be adopted:
+
+For each adjacency `Y_X` appearing in an `AS_PATH`, we write `X RL Y`
+
+Where:
+```
+R:       ? if ASPA(Y) is empty
+         < if X in ASPA(Y)
+         - otherwise
+L:       ? if ASPA(X) is empty
+         > if Y in ASPA(X)
+         - otherwise
+ASPA(n): the set of providers listed in the ASPA issued by n
+```
+
 ## Installation and Usage
 
 This project consists of a python library implementing the verification
