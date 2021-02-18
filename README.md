@@ -8,7 +8,7 @@ In the process, however, I have identified various respects in which the
 canonical algorithm (from draft-ietf-sidrops-aspa-verification-06) produces
 suboptimal (or downright incorrect) results.
 
-These are documented below.
+These are documented below and, in greater detail, in the issues list.
 
 ## Notation
 
@@ -38,13 +38,16 @@ procedure for ASPA, and an associated suite of tests.
 Whilst this library can be installed and used for other purposes, the intention
 is for use with the suite of test cases provided in `test/`.
 
+You will need `python` version 3. Only 3.8 has been tested, but it may run on 
+*slightly* earlier versions.
+
 To run the tests locally:
 ``` bash
 # clone the repo locally and change directory into it
 $ git clone https://github.com/benmaddison/aspa-fuzz
 $ cd aspa-fuzz
 # create a new python venv and install tox
-$ python -m venv .venv
+$ python3 -m venv .venv
 $ source .venv/bin/activate
 $ pip install tox
 # execute tox to run the tests
@@ -98,7 +101,7 @@ equivalent manner.
 
   The `HeitzValidator` is also less opinionated about concerns that (arguably) fall outside the
   scope of leaked path detection, e.g. whether the neighbor ASN matches the last `AS_PATH` component,
-  and whether an empty `AS_PATH` can be Valid.
+  and whether an empty `AS_PATH` can be `Valid`.
 
 ### Comparison
 
