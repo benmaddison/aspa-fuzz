@@ -15,7 +15,7 @@ class AsPathSegment(object):
         self.values = values
 
     def __repr__(self):
-        values = map(str, self.values)
+        values = map(str, reversed(self.values))
         if self.type == AS_SEQUENCE:
             return f"{'_'.join(values)}"
         else:
@@ -30,7 +30,7 @@ class AsPath(object):
         self.segments = segments
 
     def __repr__(self):
-        return f"{'_'.join(map(repr, self.segments))}"
+        return f"{'_'.join(map(repr, reversed(self.segments)))}"
 
     def flatten(self):
         return [AsPathElement(orig_segment_type=s.type, value=v)
