@@ -76,17 +76,35 @@
   neighbor_as: 2
   neighbor_types: [Peer]
   expected_state: Valid
+  # route-server variant
+- as_path: [9, 2]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Valid
 
   # 10 <- 2 -- 1
 - as_path: [10, 2]
   neighbor_as: 2
   neighbor_types: [Peer]
   expected_state: Invalid
+  # route-server variant
+- as_path: [10, 2]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Invalid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 11 <> 2 -- 1
 - as_path: [11, 2]
   neighbor_as: 2
   neighbor_types: [Peer]
+  expected_state: Valid
+  # route-server variant
+- as_path: [11, 2]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
   expected_state: Valid
 
   # 8 -- 3 -> 1
@@ -181,12 +199,25 @@
   neighbor_as: 7
   neighbor_types: [Customer, Peer]
   expected_state: Unknown
+  # route-server variant
+- as_path: [19, 7]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Unknown
 
   # 21 ?- 7 -? 1
 - as_path: [21, 7]
   neighbor_as: 7
   neighbor_types: [Customer, Peer]
   expected_state: Invalid
+  # route-server variant
+- as_path: [21, 7]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Invalid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 20 ?> 19 ?? 6 <? 1
 - as_path: [20, 19, 6]
@@ -208,6 +239,14 @@
   neighbor_as: 7
   neighbor_types: [Customer, Peer]
   expected_state: Invalid
+  # route-server variant
+- as_path: [21, 22, 19, 7]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Invalid
+  xfail:
+    validator: Draft6Validator
+    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 23 ?> 22 ?? 19 ?? 6 <? 1
 - as_path: [23, 22, 19, 6]
