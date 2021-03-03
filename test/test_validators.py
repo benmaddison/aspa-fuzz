@@ -26,8 +26,8 @@ class TestValidators(object):
         assert state is Unverifiable
 
     def test_validator(self, afi, aspa_set, validator_cls, case):
-        if case.xfail.get("validator") == validator_cls.name:
-            pytest.xfail(case.xfail["msg"])
+        if validator_cls.name in case.xfail.get("validators", []):
+            pytest.xfail(case.xfail["msg"].format(validator=validator_cls))
         validator = validator_cls(aspa_set, local_as=LOCAL_AS)
         state = validator.validate(as_path=case.as_path,
                                    neighbor_as=case.neighbor_as,

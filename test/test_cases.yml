@@ -8,8 +8,8 @@
   neighbor_types: [Customer, Peer, Provider, IxpRouteServer, IxpRouteServer]
   expected_state: Valid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator returns Invalid for empty paths. See issue #2"
+    validators: [Draft6Validator, Draft7Validator]
+    msg: "{validator} returns Invalid for empty paths. See issue #2"
 
   # 2 -- 1
 - as_path: [2]
@@ -68,8 +68,8 @@
   neighbor_types: [IxpRouteServer]
   expected_state: Invalid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
+    validators: [Draft6Validator]
+    msg: "{validator} BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 9 -> 2 -- 1
 - as_path: [9, 2]
@@ -93,8 +93,8 @@
   neighbor_types: [IxpRouteServer]
   expected_state: Invalid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
+    validators: [Draft6Validator]
+    msg: "{validator} BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 11 <> 2 -- 1
 - as_path: [11, 2]
@@ -191,8 +191,8 @@
   neighbor_types: [Provider]
   expected_state: Valid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator returns Unknown in this case. See issue #1"
+    validators: [Draft6Validator, Draft7Validator]
+    msg: "{validator} returns Unknown in this case. See issue #1"
 
   # 19 ?? 7 -? 1
 - as_path: [19, 7]
@@ -216,8 +216,8 @@
   neighbor_types: [IxpRouteServer]
   expected_state: Invalid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
+    validators: [Draft6Validator]
+    msg: "{validator} BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 20 ?> 19 ?? 6 <? 1
 - as_path: [20, 19, 6]
@@ -225,8 +225,8 @@
   neighbor_types: [Provider]
   expected_state: Valid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator returns Unknown in this case. See issue #1"
+    validators: [Draft6Validator, Draft7Validator]
+    msg: "{validator} returns Unknown in this case. See issue #1"
 
   # 25 <- 14 <> 3 -> 1
 - as_path: [25, 14, 3]
@@ -245,8 +245,8 @@
   neighbor_types: [IxpRouteServer]
   expected_state: Invalid
   xfail:
-    validator: Draft6Validator
-    msg: "Draft6Validator BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
+    validators: [Draft6Validator]
+    msg: "{validator} BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
 
   # 23 ?> 22 ?? 19 ?? 6 <? 1
 - as_path: [23, 22, 19, 6]

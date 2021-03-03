@@ -8,6 +8,7 @@ from .afi import IPV4, IPV6
 from .as_path import AsPath, AsPathSegment, AS_SEQUENCE, AS_SET
 from .aspa import Aspa, AspaSet
 from .draft_06 import Validator as Draft6Validator
+from .draft_07 import Validator as Draft7Validator
 from .heitz import Validator as HeitzValidator
 from .neighbors import (Any, Customer,
                         IxpRouteServer, IxpRouteServerClient,
@@ -27,6 +28,7 @@ __all__ = [
     Any, Customer, IxpRouteServer, IxpRouteServerClient, Peer, Provider,
     # Validator implementations
     Draft6Validator,
+    Draft7Validator,
     HeitzValidator,
     # Validation States
     Unverifiable, Unknown, Valid, Invalid

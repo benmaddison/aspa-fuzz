@@ -7,7 +7,7 @@ import os
 from aspa import (IPV4, IPV6,
                   AsPath, AsPathSegment, AS_SEQUENCE,
                   Aspa, AspaSet,
-                  Draft6Validator, HeitzValidator)
+                  Draft6Validator, Draft7Validator, HeitzValidator)
 import aspa.neighbors
 import aspa.state
 
@@ -56,7 +56,7 @@ def aspa_set(afi):
 
 
 @pytest.fixture(scope="session",
-                params=(Draft6Validator, HeitzValidator),
+                params=(Draft6Validator, Draft7Validator, HeitzValidator),
                 ids=repr)
 def validator_cls(request):
     return request.param
