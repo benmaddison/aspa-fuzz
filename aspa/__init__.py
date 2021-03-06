@@ -10,6 +10,7 @@ from .aspa import Aspa, AspaSet
 from .draft_06 import Validator as Draft6Validator
 from .draft_07 import Validator as Draft7Validator
 from .heitz import Validator as HeitzValidator
+from .heitz_maddison import Validator as HeitzMaddisonValidator
 from .neighbors import (Any, Customer,
                         IxpRouteServer, IxpRouteServerClient,
                         Peer, Provider)
@@ -30,6 +31,7 @@ __all__ = [
     Draft6Validator,
     Draft7Validator,
     HeitzValidator,
+    HeitzMaddisonValidator,
     # Validation States
     Unverifiable, Unknown, Valid, Invalid
 ]

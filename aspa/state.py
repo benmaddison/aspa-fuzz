@@ -27,7 +27,17 @@ class _Invalid(_BaseState):
     name = "Invalid"
 
 
+class _Authorised(_BaseState):
+    name = "Authorised"
+
+
+class _Unauthorised(_BaseState):
+    name = "Unauthorised"
+
+
 Unverifiable = _Unverifiable()
 Unknown = _Unknown()
 Valid = _Valid()
 Invalid = _Invalid()
+Authorised = _Authorised()
+Unauthorised = _Unauthorised()
