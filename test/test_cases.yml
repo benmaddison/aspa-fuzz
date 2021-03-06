@@ -234,6 +234,48 @@
   neighbor_types: [Customer]
   expected_state: Invalid
 
+  # 19 -? 14 <> 3 -> 1
+- as_path: [19, 14, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer, Peer]
+  expected_state: Unknown
+  xfail:
+    validators: [HeitzValidator]
+    msg: "{validator} BUG: incorrect status for Unknowns with siblings in the path: See issue #7"
+  # route-server variant
+- as_path: [19, 14, 3]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Unknown
+  xfail:
+    validators: [HeitzValidator]
+    msg: "{validator} BUG: incorrect status for Unknowns with siblings in the path: See issue #7"
+
+  # 21 -- 14 <> 3 -> 1
+- as_path: [21, 14, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer, Peer]
+  expected_state: Invalid
+  # route-server variant
+- as_path: [21, 14, 3]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Invalid
+  xfail:
+    validators: [Draft6Validator]
+    msg: "{validator} BUG: incorrect status for Invalids via transparent IXP RS: See issue #4"
+
+  # 27 -> 14 <> 3 -> 1
+- as_path: [27, 14, 3]
+  neighbor_as: 3
+  neighbor_types: [Customer, Peer]
+  expected_state: Valid
+  # route-server variant
+- as_path: [27, 14, 3]
+  neighbor_as: 100
+  neighbor_types: [IxpRouteServer]
+  expected_state: Valid
+
   # 21 ?- 22 ?? 19 ?? 7 -? 1
 - as_path: [21, 22, 19, 7]
   neighbor_as: 7
@@ -253,5 +295,4 @@
   neighbor_as: 6
   neighbor_types: [Provider]
   expected_state: Unknown
-
 ...
