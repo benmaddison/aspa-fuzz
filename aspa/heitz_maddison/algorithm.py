@@ -9,7 +9,7 @@
 #     ASes to avoid confusion with Valid and Invalid.
 #   - Only de-duplicate consecutive ASNs in the AS_PATH
 #
-# """aspa.heitz_maddison.algorithm Module."""
+"""aspa.heitz_maddison.algorithm Module."""
 
 from ..as_path import AS_SEQUENCE, AsPath
 from ..aspa import AspaSet, NoAspa
@@ -54,62 +54,61 @@ class Validator(metaclass=MetaValidator):
         #
         partial_status = Valid
         #
-        # Step 3 - iterate over transited ASNs
-        #
         # Denote the ASN at propagation_path[k] as Tk
         #
-        # TODO: fix nasty offset hack
-        for offset_i, left_transit in enumerate(propagation_path[1:-1]):
-            i = 1 + offset_i
-            for offset_j, right_transit in enumerate(propagation_path[i:-1]):
-                j = i + offset_j
-                #
-                # 3.1 - determine whether Ti-1 asserts that Ti is an authorised
-                #       provider
-                #
-                transit_for_left = self.verify_left(propagation_path, i, afi)
-                #
-                # 3.2 - For each sequence of transits Ti..Tj, determine
-                #       whether Tj is an authorised provider of Tj+1.
-                #
-                transit_for_right = self.verify_right(propagation_path, j, afi)
-                #
-                # 3.3 - If both:
-                #         - Ti-1 asserts that Ti is not an authorised
-                #           provider; and
-                #         - Tj+1 asserts that Tj is not an authorised
-                #           provider
-                #       then a route has been sent to a non-provider by
-                #       Ti-1 and received from a non-provider by Tj+1.
-                #
-                #       Thus, there must be a leak somewhere in the
-                #       sequence Ti..Tj.
-                #
-                #       Note that if i=j, then Ti is the leaker.
-                #
-                if transit_for_left is Unauthorised and \
-                   transit_for_right is Unauthorised:
-                    return Invalid
-                #
-                # 3.4 - If either:
-                #         - Ti-1 asserts that Ti is an authorised
-                #           provider; or
-                #         - Tj+1 asserts that Tj is an authorised
-                #           provider,
-                #       then no leak has occured in the sequence Ti..Tj.
-                #
-                #       Continue to the next sequence of transits.
-                #
-                if transit_for_left is Authorised or \
-                   transit_for_right is Authorised:
-                    continue
-                #
-                # 3.5 - We do not have enough information about this sequence
-                #       to assert that no leak as occured.
-                #
-                #       The path can no longer be Valid.
-                #
-                partial_status = Unknown
+        # Step 3 - iterate over each sequence of transits Ti..Tj.
+        #
+        transits = propagation_path[1:-1]
+        transit_sequences = [(1 + i, 1 + j)
+                             for i, _ in enumerate(transits)
+                             for j, _ in enumerate(transits)
+                             if i <= j]
+        for i, j in transit_sequences:
+            #
+            # 3.1 - determine whether Ti is an authorised provider of Ti-1.
+            #
+            transit_for_left = self.verify_left(propagation_path, i, afi)
+            #
+            # 3.2 - determine whether Tj is an authorised provider of Tj+1.
+            #
+            transit_for_right = self.verify_right(propagation_path, j, afi)
+            #
+            # 3.3 - If both:
+            #         - Ti-1 asserts that Ti is not an authorised
+            #           provider; and
+            #         - Tj+1 asserts that Tj is not an authorised
+            #           provider
+            #       then a route has been sent to a non-provider by
+            #       Ti-1 and received from a non-provider by Tj+1.
+            #
+            #       Thus, there must be a leak somewhere in the
+            #       sequence Ti..Tj.
+            #
+            #       Note that if i=j, then Ti is the leaker.
+            #
+            if transit_for_left is Unauthorised and \
+               transit_for_right is Unauthorised:
+                return Invalid
+            #
+            # 3.4 - If either:
+            #         - Ti-1 asserts that Ti is an authorised
+            #           provider; or
+            #         - Tj+1 asserts that Tj is an authorised
+            #           provider,
+            #       then no leak has occured in the sequence Ti..Tj.
+            #
+            #       Continue to the next sequence of transits.
+            #
+            if transit_for_left is Authorised or \
+               transit_for_right is Authorised:
+                continue
+            #
+            # 3.5 - We do not have enough information about this sequence
+            #       to assert that no leak has occured.
+            #
+            #       The path can no longer be Valid.
+            #
+            partial_status = Unknown
         #
         # Step 4 - Having iterated over all sub-sequences of transits in the
         #          path, return the current path state.
