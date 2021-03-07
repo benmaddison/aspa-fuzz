@@ -30,101 +30,101 @@ class Validator(metaclass=MetaValidator):
 
     def validate(self, as_path: AsPath, afi, **kwargs):
         #
-        # Step 0 - return early if there are AS_SETs in the path
+        # Step 1 - prepare `propagation_path`
         #
-        if any((s.type != AS_SEQUENCE for s in as_path.segments)):
-            return Unverifiable
-        #
-        # Step 1 - prepare de-duplicated AS sequence
-        #
-        as_seq = list()
+        # 1.1 Initialise `propagation_path`
+        propagation_path = list()
+        # 1.2 Interate over as_path segments
         for segment in as_path.segments:
+            # 1.2.1 Return early if non AS_SEQUENCE segments are found
+            if segment.type != AS_SEQUENCE:
+                return Unverifiable
+            # 1.2.2 Append ASNs in AS_PATH to `propagation_path`
             for asn in segment.values:
                 try:
-                    last = as_seq[-1]
+                    last = propagation_path[-1]
                 except IndexError:
                     last = None
                 if asn != last:
-                    as_seq.append(asn)
-        as_seq.append(self.local_as)
+                    propagation_path.append(asn)
+        # 1.3 Append `local_as` to `propagation_path`
+        propagation_path.append(self.local_as)
         #
         # Step 2 - Initialise the path state to Valid
         #
-        path_state = Valid
+        partial_status = Valid
         #
         # Step 3 - iterate over transited ASNs
         #
-        for transit in as_seq[1:-1]:
-            #
-            # Get index of 'transit' in 'as_seq'
-            # Denote the ASN at as_seq[i] as Ti
-            #
-            i = as_seq.index(transit)
-            #
-            # Step 3.1 - determine whether Ti-1 asserts that Ti is an authorised
-            #            provider
-            #
-            transit_for_left = self.verify_left(as_seq, i, afi)
-            #
-            # Step 3.2 - if Ti is an authorised provider of Ti-1 then Ti cannot
-            #            have leaked the path.
-            if transit_for_left is not Authorised:
-                #        Alternatively, search for a sequence beginning at Ti in
-                #        which a leak may have occurred.
-                #
-                # Step 3.3 - Check sequences of transits Ti..Tj for j>=i
-                #
-                for next_transit in as_seq[i:-1]:
-                    j = as_seq.index(next_transit)
-                    #
-                    # Step 3.4 - For each sequence of transits Ti..Tj, determine
-                    #            whether Tj is an authorised provider of Tj+1.
-                    #
-                    transit_for_right = self.verify_right(as_seq, j, afi)
-                    #
-                    # Step 3.5 - If both:
-                    #              - Ti-1 asserts that Ti is not an authorised
-                    #                provider; and
-                    #              - Tj+1 asserts that Tj is not an authorised
-                    #                provider
-                    #            then a route has been sent to a non-provider by
-                    #            Ti-1 and received from a non-provider by Tj+1.
-                    #
-                    #            Thus, there must be a leak somewhere in the
-                    #            sequence Ti..Tj.
-                    #
-                    #            Note that if i=j, then Ti is the leaker.
-                    #
-                    if transit_for_left is Unauthorised and \
-                       transit_for_right is Unauthorised:
-                        return Invalid
-                    #
-                    # Step 3.6 - If Tj+1 has not authorised Tj as a provider
-                    #            (either explicity, or by failing to create an
-                    #            ASPA object), then we do not have enough
-                    #            information to assert whether the path is
-                    #            Valid or Invalid.
-                    #
-                    #            That is, there are exist ASPA objects that, if
-                    #            they were created, could make the path either
-                    #            Valid or Invalid depending on the authorisations
-                    #            They provide.
-                    #
-                    #            Thus, Valid is no-longer a possible outcome of
-                    #            this verification procedure.
-                    #
-                    if transit_for_right is not Authorised:
-                        path_state = Unknown
+        # Denote the ASN at propagation_path[k] as Tk
         #
-        # Step 4 - Having iterated over all transits in the path, return the
-        #          current path state.
-        return path_state
+        # TODO: fix nasty offset hack
+        for offset_i, left_transit in enumerate(propagation_path[1:-1]):
+            i = 1 + offset_i
+            for offset_j, right_transit in enumerate(propagation_path[i:-1]):
+                j = i + offset_j
+                #
+                # 3.1 - determine whether Ti-1 asserts that Ti is an authorised
+                #       provider
+                #
+                transit_for_left = self.verify_left(propagation_path, i, afi)
+                #
+                # 3.2 - For each sequence of transits Ti..Tj, determine
+                #       whether Tj is an authorised provider of Tj+1.
+                #
+                transit_for_right = self.verify_right(propagation_path, j, afi)
+                #
+                # 3.3 - If both:
+                #         - Ti-1 asserts that Ti is not an authorised
+                #           provider; and
+                #         - Tj+1 asserts that Tj is not an authorised
+                #           provider
+                #       then a route has been sent to a non-provider by
+                #       Ti-1 and received from a non-provider by Tj+1.
+                #
+                #       Thus, there must be a leak somewhere in the
+                #       sequence Ti..Tj.
+                #
+                #       Note that if i=j, then Ti is the leaker.
+                #
+                if transit_for_left is Unauthorised and \
+                   transit_for_right is Unauthorised:
+                    return Invalid
+                #
+                # 3.4 - If either:
+                #         - Ti-1 asserts that Ti is an authorised
+                #           provider; or
+                #         - Tj+1 asserts that Tj is an authorised
+                #           provider,
+                #       then no leak has occured in the sequence Ti..Tj.
+                #
+                #       Continue to the next sequence of transits.
+                #
+                if transit_for_left is Authorised or \
+                   transit_for_right is Authorised:
+                    continue
+                #
+                # 3.5 - We do not have enough information about this sequence
+                #       to assert that no leak as occured.
+                #
+                #       The path can no longer be Valid.
+                #
+                partial_status = Unknown
+        #
+        # Step 4 - Having iterated over all sub-sequences of transits in the
+        #          path, return the current path state.
+        #
+        return partial_status
 
-    def verify_left(self, as_seq, index, afi):
-        return self.verify_authorisation(as_seq[index-1], as_seq[index], afi)
+    def verify_left(self, propagation_path, index, afi):
+        return self.verify_authorisation(propagation_path[index-1],
+                                         propagation_path[index],
+                                         afi)
 
-    def verify_right(self, as_seq, index, afi):
-        return self.verify_authorisation(as_seq[index+1], as_seq[index], afi)
+    def verify_right(self, propagation_path, index, afi):
+        return self.verify_authorisation(propagation_path[index+1],
+                                         propagation_path[index],
+                                         afi)
 
     def verify_authorisation(self, as1, as2, afi):
         try:
